@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="前言：本文操作全是在Pve下完成的，且需要有其他Linux发行版基础1.下载在安装之前，我们需要有ISO镜像文件由于源镜像在国外地址，所以本文的镜像采用清华源镜像站下载https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;nixos-images&#x2F;nixos-23.05&#x2F;latest-nixos-minimal-x86_64-linux.iso">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NixOS安装教程">
+<meta property="og:url" content="http://example.com/2023/06/16/NixOS%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/index.html">
+<meta property="og:site_name" content="EACGH">
+<meta property="og:description" content="前言：本文操作全是在Pve下完成的，且需要有其他Linux发行版基础1.下载在安装之前，我们需要有ISO镜像文件由于源镜像在国外地址，所以本文的镜像采用清华源镜像站下载https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;nixos-images&#x2F;nixos-23.05&#x2F;latest-nixos-minimal-x86_64-linux.iso">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/nix/1.png">
+<meta property="og:image" content="http://example.com/images/nix/2.png">
+<meta property="og:image" content="http://example.com/images/nix/3.png">
+<meta property="og:image" content="http://example.com/images/nix/4.png">
+<meta property="og:image" content="http://example.com/images/nix/5.png">
+<meta property="og:image" content="http://example.com/images/nix/6.png">
+<meta property="og:image" content="http://example.com/images/nix/7.png">
+<meta property="og:image" content="http://example.com/images/nix/8.png">
+<meta property="og:image" content="http://example.com/images/nix/9.png">
+<meta property="og:image" content="http://example.com/images/nix/10.png">
+<meta property="og:image" content="http://example.com/images/nix/11.png">
+<meta property="og:image" content="http://example.com/images/nix/12.png">
+<meta property="og:image" content="http://example.com/images/nix/13.png">
+<meta property="og:image" content="http://example.com/images/nix/14.png">
+<meta property="article:published_time" content="2023-06-16T18:24:00.000Z">
+<meta property="article:modified_time" content="2023-06-17T08:06:31.223Z">
+<meta property="article:author" content="Lisky">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/nix/1.png">
+
+<link rel="canonical" href="http://example.com/2023/06/16/NixOS%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>NixOS安装教程 | EACGH</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EACGH</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/06/16/NixOS%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://q1.qlogo.cn/g?b=qq&nk=2700787101&s=640">
+      <meta itemprop="name" content="Lisky">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EACGH">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NixOS安装教程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-06-16 18:24:00" itemprop="dateCreated datePublished" datetime="2023-06-16T18:24:00+00:00">2023-06-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-06-17 08:06:31" itemprop="dateModified" datetime="2023-06-17T08:06:31+00:00">2023-06-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/NixOS/" itemprop="url" rel="index"><span itemprop="name">NixOS</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h6 id="前言：本文操作全是在Pve下完成的，且需要有其他Linux发行版基础"><a href="#前言：本文操作全是在Pve下完成的，且需要有其他Linux发行版基础" class="headerlink" title="前言：本文操作全是在Pve下完成的，且需要有其他Linux发行版基础"></a>前言：本文操作全是在Pve下完成的，且需要有其他Linux发行版基础</h6><h2 id="1-下载"><a href="#1-下载" class="headerlink" title="1.下载"></a>1.下载</h2><h4 id="在安装之前，我们需要有ISO镜像文件"><a href="#在安装之前，我们需要有ISO镜像文件" class="headerlink" title="在安装之前，我们需要有ISO镜像文件"></a>在安装之前，我们需要有ISO镜像文件</h4><h4 id="由于源镜像在国外地址，所以本文的镜像采用清华源镜像站下载"><a href="#由于源镜像在国外地址，所以本文的镜像采用清华源镜像站下载" class="headerlink" title="由于源镜像在国外地址，所以本文的镜像采用清华源镜像站下载"></a>由于源镜像在国外地址，所以本文的镜像采用<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/">清华源镜像站</a>下载</h4><pre><code>https://mirrors.tuna.tsinghua.edu.cn/nixos-images/nixos-23.05/latest-nixos-minimal-x86_64-linux.iso
+</code></pre>
+<span id="more"></span>
+<h2 id="2-安装"><a href="#2-安装" class="headerlink" title="2.安装"></a>2.安装</h2><h4 id="虚拟机安装可采用Hyper-V、Kvm、Vmware、Vbox…-本文采用基于Kvm的Pve虚拟化安装"><a href="#虚拟机安装可采用Hyper-V、Kvm、Vmware、Vbox…-本文采用基于Kvm的Pve虚拟化安装" class="headerlink" title="虚拟机安装可采用Hyper-V、Kvm、Vmware、Vbox…(本文采用基于Kvm的Pve虚拟化安装)"></a>虚拟机安装可采用Hyper-V、Kvm、Vmware、Vbox…(本文采用基于Kvm的Pve虚拟化安装)</h4><p><img src="/images/nix/1.png" alt="新建虚拟机1"><br><img src="/images/nix/2.png" alt="新建虚拟机2"><br><img src="/images/nix/3.png" alt="新建虚拟机3"><br><img src="/images/nix/4.png" alt="新建虚拟机4"><br><img src="/images/nix/5.png" alt="新建虚拟机5"><br><img src="/images/nix/6.png" alt="新建虚拟机6"><br><img src="/images/nix/7.png" alt="新建虚拟机7"></p>
+<h4 id="由于是虚拟机，所以配置上按需配置，不需要和我一样"><a href="#由于是虚拟机，所以配置上按需配置，不需要和我一样" class="headerlink" title="由于是虚拟机，所以配置上按需配置，不需要和我一样"></a>由于是虚拟机，所以配置上按需配置，不需要和我一样</h4><h4 id="这时候我们启动虚拟机，我们可以看到启动后的界面是如下图"><a href="#这时候我们启动虚拟机，我们可以看到启动后的界面是如下图" class="headerlink" title="这时候我们启动虚拟机，我们可以看到启动后的界面是如下图"></a>这时候我们启动虚拟机，我们可以看到启动后的界面是如下图</h4><p><img src="/images/nix/8.png" alt="启动后界面"></p>
+<h4 id="首先，用fdisk工具查看并分区"><a href="#首先，用fdisk工具查看并分区" class="headerlink" title="首先，用fdisk工具查看并分区"></a>首先，用fdisk工具查看并分区</h4><h6 id="提示-为了方便作者这边使用ssh连接"><a href="#提示-为了方便作者这边使用ssh连接" class="headerlink" title="提示: 为了方便作者这边使用ssh连接"></a>提示: 为了方便作者这边使用ssh连接</h6><p><img src="/images/nix/9.png" alt="分区"></p>
+<h4 id="我们这边给分区格式化为ext4文件格式"><a href="#我们这边给分区格式化为ext4文件格式" class="headerlink" title="我们这边给分区格式化为ext4文件格式"></a>我们这边给分区格式化为ext4文件格式</h4><pre><code>mkfs.ext4 /dev/sda1
+</code></pre>
+<p><img src="/images/nix/10.png" alt="格式化分区"></p>
+<h4 id="挂载分区到-x2F-mnt目录下"><a href="#挂载分区到-x2F-mnt目录下" class="headerlink" title="挂载分区到&#x2F;mnt目录下"></a>挂载分区到&#x2F;mnt目录下</h4><pre><code>mount /dev/sda1 /mnt
+</code></pre>
+<p><img src="/images/nix/11.png" alt="挂载分区"></p>
+<h4 id="使用nixos-generate-config命令给-x2F-mnt生成默认配置文件"><a href="#使用nixos-generate-config命令给-x2F-mnt生成默认配置文件" class="headerlink" title="使用nixos-generate-config命令给&#x2F;mnt生成默认配置文件"></a>使用nixos-generate-config命令给&#x2F;mnt生成默认配置文件</h4><pre><code>nixos-generate-config --root /mnt/
+</code></pre>
+<p><img src="/images/nix/12.png" alt="生成配置文件"></p>
+<h4 id="使用你习惯的编辑器编辑configuration-nix-作者这边使用Vim编辑器做参考"><a href="#使用你习惯的编辑器编辑configuration-nix-作者这边使用Vim编辑器做参考" class="headerlink" title="使用你习惯的编辑器编辑configuration.nix(作者这边使用Vim编辑器做参考)"></a>使用你习惯的编辑器编辑configuration.nix(作者这边使用Vim编辑器做参考)</h4><pre><code>vim /mnt/etc/nixos/configuration.nix
+</code></pre>
+<p><img src="/images/nix/13.png" alt="系统配置界面"></p>
+<h4 id="修改grub引导"><a href="#修改grub引导" class="headerlink" title="修改grub引导"></a>修改grub引导</h4><pre><code>boot.loader.grub.enable = true;
+boot.loader.grub.device = &quot;/dev/sda&quot;;
+</code></pre>
+<h4 id="修改时区"><a href="#修改时区" class="headerlink" title="修改时区"></a>修改时区</h4><pre><code>time.timeZone = &quot;Asia/Shanghai&quot;;
+</code></pre>
+<h4 id="修改语言-作者这边闲方便所以直接改成了zh-CN-UTF-8"><a href="#修改语言-作者这边闲方便所以直接改成了zh-CN-UTF-8" class="headerlink" title="修改语言(作者这边闲方便所以直接改成了zh_CN.UTF-8)"></a>修改语言(作者这边闲方便所以直接改成了zh_CN.UTF-8)</h4><pre><code>i18n.defaultLocale = &quot;zh_CN.UTF-8&quot;;
+</code></pre>
+<h4 id="找到用户配置的地方"><a href="#找到用户配置的地方" class="headerlink" title="找到用户配置的地方"></a>找到用户配置的地方</h4><pre><code>users.users.alice = &#123;
+    isNormalUser = true;
+    extraGroups = [ &quot;wheel&quot; ];
+    packages = with pkgs; [
+         neofetch
+    ];
+&#125;;
+</code></pre>
+<h4 id="改成"><a href="#改成" class="headerlink" title="改成"></a>改成</h4><pre><code>users.mutableUsers = false;
+users.users.root.hashedPassword = &quot;$y$j9T$G2w0TkDbr95KSmQlyDcSc1$HYT7shT5NRiymzswRlCWK4p7bn9Gzqegd645wWvhKpC&quot;;
+users.users.lisky = &#123;
+    hashedPassword = &quot;$y$j9T$N5u6Uk7hK1hBGqwbv2noF1$dDGxFSSgEMCZFtYsS1IkdA9ShWCf1nU/Vgoj2UuCkJ6&quot;;
+    isNormalUser = true;
+    extraGroups = [ &quot;wheel&quot; ];
+    packages = with pkgs; [
+         neofetch
+    ];
+&#125;;
+</code></pre>
+<p><em><strong>alice</strong></em> 改成自己的用户名<br><em><strong>users.mutableUsers &#x3D; false;</strong></em> 意思是强制只使用我们写的 nix 配置添加管理用户<br><em><strong>hashedPassword</strong></em>  是个加密哈希值(用户密码)，可使用 <em><strong>mkpasswd</strong></em> 命令生成</p>
+<h4 id="找到并将注释去掉"><a href="#找到并将注释去掉" class="headerlink" title="找到并将注释去掉"></a>找到并将注释去掉</h4><pre><code># environment.systemPackages = with pkgs; [
+#	 vim
+#	 htop
+# ];
+</code></pre>
+<hr>
+<pre><code>environment.systemPackages = with pkgs; [
+    vim
+    htop
+];
+</code></pre>
+<h4 id="将sshd服务打开"><a href="#将sshd服务打开" class="headerlink" title="将sshd服务打开"></a>将sshd服务打开</h4><pre><code>services.openssh.enable = true;
+</code></pre>
+<h4 id="添加NixOS国内源"><a href="#添加NixOS国内源" class="headerlink" title="添加NixOS国内源"></a>添加NixOS国内源</h4><pre><code>nix.settings.substituters = [ &quot;https://mirrors.ustc.edu.cn/nix-channels/store&quot; ];
+</code></pre>
+<h4 id="保存并退出文件后，使用以下其中一条命令就可以开始安装系统了"><a href="#保存并退出文件后，使用以下其中一条命令就可以开始安装系统了" class="headerlink" title="保存并退出文件后，使用以下其中一条命令就可以开始安装系统了"></a>保存并退出文件后，使用以下其中一条命令就可以开始安装系统了</h4><pre><code>nixos-install --option substituters https://mirrors.ustc.edu.cn/nix-channels/store
+nixos-install --no-root-passwd --option substituters https://mirrors.ustc.edu.cn/nix-channels/store
+</code></pre>
+<h4 id="最后reboot一下就能进入系统了"><a href="#最后reboot一下就能进入系统了" class="headerlink" title="最后reboot一下就能进入系统了"></a>最后reboot一下就能进入系统了</h4><p><img src="/images/nix/14.png" alt="安装完成"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/06/16/HelloWorld/" rel="prev" title="HelloWorld">
+      <i class="fa fa-chevron-left"></i> HelloWorld
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Lisky"
+      src="https://q1.qlogo.cn/g?b=qq&nk=2700787101&s=640">
+  <p class="site-author-name" itemprop="name">Lisky</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class=""></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Lisky</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
